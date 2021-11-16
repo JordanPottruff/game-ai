@@ -1,3 +1,5 @@
+package game;
+
 import java.util.Set;
 
 /**
@@ -19,7 +21,7 @@ public interface GameState {
      * Returns the set of actions that can be performed from this state.
      * @return the next actions, or an empty set if the game is over.
      */
-    Set<GameAction> getAvailableActions();
+    Set<? extends GameAction> getAvailableActions();
 
     /**
      * Returns the player who takes the next action.

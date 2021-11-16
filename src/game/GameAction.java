@@ -1,3 +1,5 @@
+package game;
+
 /**
  * An action that transitions to a new game state.
  */
