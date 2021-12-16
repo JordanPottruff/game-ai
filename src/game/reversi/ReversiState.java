@@ -145,6 +145,10 @@ public class ReversiState implements GameState {
         return 0;
     }
 
+    public String toString() {
+        return board.toString() + String.format("%s was last to move against %s", player, opposingPlayer);
+    }
+
     private static final class Board {
         private final static char OPEN_TILE_SYMBOL = '_';
         private final Player[][] board;
