@@ -10,4 +10,7 @@ public interface GameAction {
 
     /** The game state that results from performing the action. */
     GameState getResultingState();
+
+    /** The player who performs the action. */
+    Player getPlayer();
 }

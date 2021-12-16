@@ -8,14 +8,14 @@ import java.util.Set;
 public interface GameState {
 
     /**
-     * Returns the first player of the game.
+     * Returns the player whose action resulted in the current state.
      */
-    Player getFirstPlayer();
+    Player getPlayer();
 
     /**
-     * Returns the second player of the game.
+     * Returns the opposing player.
      */
-    Player getSecondPlayer();
+    Player getOpposingPlayer();
 
     /**
      * Returns the set of actions that can be performed from this state.
