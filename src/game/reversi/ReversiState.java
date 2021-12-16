@@ -28,7 +28,7 @@ public class ReversiState implements GameState {
     }
 
     public ReversiState(Player white, Player black) {
-        this(white, black, new Board(white, black));
+        this(black, white, new Board(white, black));
     }
 
     public Player getPlayer() {
@@ -78,15 +78,15 @@ public class ReversiState implements GameState {
         List<Coord> bottomLeft = new ArrayList<>();
         List<Coord> left = new ArrayList<>();
 
-        for(int i=0; i<BOARD_SIZE; i++) {
-            addCoord(x-1, y+1, topLeft);
-            addCoord(x, y+1, top);
-            addCoord(x+1, y+1, topRight);
-            addCoord(x+1, y, right);
-            addCoord(x+1, y-1, bottomRight);
-            addCoord(x, y-1, bottom);
-            addCoord(x-1, y-1, bottomLeft);
-            addCoord(x-1, y, left);
+        for(int i=1; i<BOARD_SIZE; i++) {
+            addCoord(x-i, y+i, topLeft);
+            addCoord(x, y+i, top);
+            addCoord(x+i, y+i, topRight);
+            addCoord(x+i, y, right);
+            addCoord(x+i, y-i, bottomRight);
+            addCoord(x, y-i, bottom);
+            addCoord(x-i, y-i, bottomLeft);
+            addCoord(x-i, y, left);
         }
 
         Set<Coord> flips = new HashSet<>();
@@ -113,9 +113,9 @@ public class ReversiState implements GameState {
             Coord coord = path.get(i);
             Player owner = board.get(coord);
             if (owner == null) {
-                break;
-            } else if (owner == player) {
                 return new HashSet<>();
+            } else if (owner == player) {
+                return flips;
             } else {
                 if (i == path.size() - 1) {
                     return new HashSet<>();
@@ -146,7 +146,11 @@ public class ReversiState implements GameState {
     }
 
     public String toString() {
-        return board.toString() + String.format("%s was last to move against %s", player, opposingPlayer);
+        return board.toString() +
+                String.format(
+                        "\n%s was last to move against %s",
+                        player.getLabel(),
+                        opposingPlayer.getLabel());
     }
 
     private static final class Board {
@@ -202,12 +206,17 @@ public class ReversiState implements GameState {
         public String toString() {
             StringBuilder str = new StringBuilder();
             for(int y=BOARD_SIZE-1; y>=0; y--) {
+                str.append(y).append(" ");
                 for(int x=0; x<BOARD_SIZE; x++) {
                     Player atPosition = board[x][y];
                     char symbol = atPosition == null ? OPEN_TILE_SYMBOL : atPosition.getSymbol();
-                    str.append(symbol);
+                    str.append(symbol).append(" ");
                 }
                 str.append("\n");
+            }
+            str.append("  ");
+            for(int i=0; i<BOARD_SIZE; i++) {
+                str.append(i).append(" ");
             }
             return str.toString();
         }
