@@ -7,4 +7,7 @@ public interface Player {
 
     /** Returns the label for the player. */
     String getLabel();
+
+    /** Returns the symbol for the player. */
+    char getSymbol();
 }

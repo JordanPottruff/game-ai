@@ -146,6 +146,7 @@ public class ReversiState implements GameState {
     }
 
     private static final class Board {
+        private final static char OPEN_TILE_SYMBOL = '_';
         private final Player[][] board;
 
         Board(Player white, Player black) {
@@ -192,6 +193,19 @@ public class ReversiState implements GameState {
                 System.arraycopy(board[x], 0, copyBoard[x], 0, BOARD_SIZE);
             }
             return new Board(copyBoard);
+        }
+
+        public String toString() {
+            StringBuilder str = new StringBuilder();
+            for(int y=BOARD_SIZE-1; y>=0; y--) {
+                for(int x=0; x<BOARD_SIZE; x++) {
+                    Player atPosition = board[x][y];
+                    char symbol = atPosition == null ? OPEN_TILE_SYMBOL : atPosition.getSymbol();
+                    str.append(symbol);
+                }
+                str.append("\n");
+            }
+            return str.toString();
         }
     }
 
