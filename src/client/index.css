@@ -1,0 +1,13 @@
+#board {
+    margin: auto;
+    width: 800px;
+}
+
+#below {
+    width: 800px;
+    margin: auto;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: "Arial";
+    text-align: center;
+}

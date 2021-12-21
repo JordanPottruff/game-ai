@@ -31,7 +31,8 @@ public interface GameState {
 
     /**
      * Returns the score differential between the two players.
-     * @return the first player's score subtracted by the second player's score.
+     * @return the score of the player returned from {@code getPlayer} minus the
+     * score of the player returned from {@code getOpposingPlayer}.
      */
     double getScoreDifferential();
 }

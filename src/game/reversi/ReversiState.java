@@ -28,7 +28,7 @@ public class ReversiState implements GameState {
     }
 
     public ReversiState(Player white, Player black) {
-        this(black, white, new Board(white, black));
+        this(white, black, new Board(white, black));
     }
 
     public Player getPlayer() {
@@ -142,7 +142,20 @@ public class ReversiState implements GameState {
     }
 
     public double getScoreDifferential() {
-        return 0;
+        int playerCount = 0;
+        int opposingPlayerCount = 0;
+        for (int x=0; x<BOARD_SIZE; x++) {
+            for(int y=0; y<BOARD_SIZE; y++) {
+                Player owner = board.get(x, y);
+                if (owner == player) playerCount++;
+                if (owner == opposingPlayer) opposingPlayerCount++;
+            }
+        }
+        return playerCount - opposingPlayerCount;
+    }
+
+    public String toJSON() {
+        return board.toJSON();
     }
 
     public String toString() {
@@ -201,6 +214,29 @@ public class ReversiState implements GameState {
                 System.arraycopy(board[x], 0, copyBoard[x], 0, BOARD_SIZE);
             }
             return new Board(copyBoard);
+        }
+
+        public String toJSON() {
+            StringBuilder str = new StringBuilder("{\"board\": [");
+            for(int i=0; i<BOARD_SIZE; i++) {
+                str.append(toJSONArray(board[i]));
+                if (i != BOARD_SIZE - 1) {
+                    str.append(",");
+                }
+            }
+            return str.append("]}").toString();
+        }
+
+        private static String toJSONArray(Player[] players) {
+            StringBuilder str = new StringBuilder("[");
+            for(int i=0; i<players.length; i++) {
+                char symbol = players[i] == null ? '_' : players[i].getSymbol();
+                str.append("\"").append(symbol).append("\"");
+                if (i != players.length-1) {
+                    str.append(",");
+                }
+            }
+            return str.append("]").toString();
         }
 
         public String toString() {

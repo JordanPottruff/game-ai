@@ -24,4 +24,8 @@ public class ReversiAction implements GameAction {
     }
 
     public Player getPlayer() { return player; }
+
+    public String toString() {
+        return label;
+    }
 }

@@ -2,42 +2,54 @@ package game.reversi;
 
 import game.Player;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class Driver {
 
-    private static final Pattern COORD_PATTERN = Pattern.compile("\\((d+),(d+)\\)");
-
     public static void main(String[] args) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        ReversiServer server = new ReversiServer("localhost", 8001);
         Player white = new ReversiPlayer("white", 'W');
         Player black = new ReversiPlayer("black", 'B');
-        ReversiState state = new ReversiState(white, black);
 
-        Set<ReversiAction> availableActions = state.getAvailableActions();
+        server.onNewGame((unused) -> {
+            System.out.println("New game!");
+            final ReversiState state = new ReversiState(white, black);
 
-        while (!availableActions.isEmpty()) {
-            System.out.println(state);
-            System.out.println("Enter move as (x,y) coordinate: ");
-            String nextMove = in.readLine().trim();
+            waitForNextMove(server, state);
+            return toJSONResponse(state);
+        });
+    }
 
-            boolean found = false;
-            for(ReversiAction action: availableActions) {
-                System.out.println(action.getLabel());
-                if (action.getLabel().equals(nextMove)) {
-                    state = action.getResultingState();
-                    availableActions = state.getAvailableActions();
-                    found = true;
+    private static void waitForNextMove(ReversiServer server, ReversiState state) {
+        server.onMove((move) -> {
+            Set<ReversiAction> actions = state.getAvailableActions();
+            System.out.println("move! " + move);
+            System.out.println("actions: " + actions);
+            for (ReversiAction action : actions) {
+                if (action.getLabel().equals(move)) {
+                    ReversiState newState = action.getResultingState();
+                    waitForNextMove(server, newState);
+                    return toJSONResponse(newState);
                 }
             }
-            if (!found) throw new IllegalArgumentException("WRONG!");
+            // Replay last state.
+            return toJSONResponse(state);
+        });
+    }
+
+    private static String toJSONResponse(ReversiState state) {
+        Set<ReversiAction> actions = state.getAvailableActions();
+        if (actions.isEmpty()) {
+            double differential = state.getScoreDifferential();
+            Player winner = differential > 0 ? state.getPlayer() : state.getOpposingPlayer();
+            return "{\"state\": " + state.toJSON() + ",\"result\": \"" + winner.getSymbol() + "\", \"diff\": \"" + differential + "\"}";
         }
-
-
-
+        Player nextPlayer = null;
+        for (ReversiAction action: actions) {
+            nextPlayer = action.getPlayer();
+            break;
+        }
+        return "{\"state\": " + state.toJSON() + ", \"nextPlayer\": \"" + nextPlayer.getSymbol() + "\"}";
     }
 }
