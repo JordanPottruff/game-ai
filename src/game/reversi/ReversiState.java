@@ -21,6 +21,8 @@ public class ReversiState implements GameState {
      */
     private final Board board;
 
+    private Set<ReversiAction> availableActions = null;
+
     private ReversiState(Player player, Player opposingPlayer, Board board) {
         this.player = player;
         this.opposingPlayer = opposingPlayer;
@@ -46,6 +48,15 @@ public class ReversiState implements GameState {
     }
 
     public Set<ReversiAction> getAvailableActions() {
+        if (availableActions == null) {
+            Set<ReversiAction> actions = getAvailableActionsNoCache();
+            availableActions = actions;
+            return actions;
+        }
+        return availableActions;
+    }
+
+    private Set<ReversiAction> getAvailableActionsNoCache() {
         Set<ReversiAction> forOpposingPlayer = getAvailableActions(opposingPlayer);
         if (forOpposingPlayer.isEmpty()) {
             return getAvailableActions(player);
@@ -138,6 +149,10 @@ public class ReversiState implements GameState {
     }
 
     public Player getNextPlayer() {
+        Set<ReversiAction> actions = getAvailableActions();
+        for(ReversiAction action: actions) {
+            return action.getPlayer();
+        }
         return null;
     }
 
@@ -154,8 +169,32 @@ public class ReversiState implements GameState {
         return playerCount - opposingPlayerCount;
     }
 
+    public double getScoreDifferential(Player player) {
+        double playerScore = getScore(player);
+        Player otherPlayer = this.player == player ? this.opposingPlayer : this.player;
+        double otherScore = getScore(otherPlayer);
+        return playerScore - otherScore;
+    }
+
+    public double getScore(Player player) {
+        if (this.player != player && this.opposingPlayer != player) {
+            throw new IllegalArgumentException("Player " + player + " does not exist.");
+        }
+        int score = 0;
+        for (int x=0; x<BOARD_SIZE; x++) {
+            for (int y=0; y<BOARD_SIZE; y++) {
+                if (board.get(x,y) == player) score++;
+            }
+        }
+        return score;
+    }
+
     public String toJSON() {
         return board.toJSON();
+    }
+
+    public void set(int x, int y, Player value) {
+        this.board.board[x][y] = value;
     }
 
     public String toString() {

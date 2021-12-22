@@ -19,4 +19,8 @@ public class ReversiPlayer implements Player {
     public char getSymbol() {
         return symbol;
     }
+
+    public String toString() {
+        return getLabel();
+    }
 }

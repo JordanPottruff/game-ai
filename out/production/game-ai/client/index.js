@@ -62,17 +62,7 @@ function mouseClicked() {
 function requestNewGame() {
     let req = new XMLHttpRequest();
     req.addEventListener("load", () => {
-        console.log(req.response);
-        response = JSON.parse(req.response);
-        if (response.result) {
-            result = response.result;
-            diff = response.diff;
-            setDirectionsForResult(result, diff);
-        } else {
-            board = response.state.board;
-            nextPlayer = response.nextPlayer;
-            setDirectionsForTurn(nextPlayer);
-        }
+        onMoveResponse(req);
     });
     req.open("POST", "http://localhost:8001/new");
     req.send();
@@ -81,33 +71,57 @@ function requestNewGame() {
 function requestMove(x, y) {
     let req = new XMLHttpRequest();
     req.addEventListener("load", () => {
-        console.log(req.response);
-        response = JSON.parse(req.response);
-        if (response.result) {
-            result = response.result;
-            diff = response.diff;
-            setDirectionsForResult(result, diff);
-        } else {
-            board = response.state.board;
-            nextPlayer = response.nextPlayer;
-            setDirectionsForTurn(nextPlayer);
-        }
+        onMoveResponse(req);
     });
     req.open("POST", "http://localhost:8001/move");
     req.send("("+x+","+y+")");
 }
 
+function onMoveResponse(req) {
+    console.log(req.response);
+    response = JSON.parse(req.response);
+    if (response.moves) {
+        states = response.moves;
+        setMove(states[0]);
+        setTimeout(() => {
+            setMove(states[1])
+        }, 2000);
+    } else {
+        setMove(response);
+    }
+}
+
+function setMove(move) {
+    board = move.state.board;
+    if (move.result) {
+        result = move.result;
+        diff = move.diff;
+        setDirectionsForResult(result, diff);
+    } else {
+        nextPlayer = move.nextPlayer;
+        setDirectionsForTurn(nextPlayer);
+    }
+}
+
 function setDirectionsForResult(winnerSymbol, differential) {
-    let numTiles = BOARD_SIZE * BOARD_SIZE;
-    let winnerTotal = numTiles / 2 + differential / 2;
-    let loserTotal = numTiles - winnerTotal;
-    let winner = winnerSymbol.trim() === 'W' ? "white" : "black";
+    let winnerTotal = 0;
+    let loserTotal = 0;
+    for (let x=0; x<BOARD_SIZE; x++) {
+        for (let y=0; y<BOARD_SIZE; y++) {
+            if (board[x][y] === winnerSymbol) {
+                winnerTotal++;
+            } else if (board[x][y] !== '_') {
+                loserTotal++;
+            }
+        }
+    }
+    let winner = winnerSymbol.trim() === 'W' ? "White" : "Black";
     let directions = "Winner: " + winner + "\n" + winnerTotal + "-" + loserTotal;
     setDirections(directions);
 }
 
 function setDirectionsForTurn(nextPlayerSymbol) {
-    let nextPlayer = nextPlayerSymbol.trim() === 'W' ? "white" : "black";
+    let nextPlayer = nextPlayerSymbol.trim() === 'W' ? "White" : "Black";
     let directions = nextPlayer + " goes next.";
     setDirections(directions);
 }

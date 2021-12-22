@@ -80,19 +80,30 @@ function requestMove(x, y) {
 function onMoveResponse(req) {
     console.log(req.response);
     response = JSON.parse(req.response);
-    board = response.state.board;
-    if (response.result) {
-        result = response.result;
-        diff = response.diff;
+    if (response.moves) {
+        states = response.moves;
+        setMove(states[0]);
+        setTimeout(() => {
+            setMove(states[1])
+        }, 2000);
+    } else {
+        setMove(response);
+    }
+}
+
+function setMove(move) {
+    board = move.state.board;
+    if (move.result) {
+        result = move.result;
+        diff = move.diff;
         setDirectionsForResult(result, diff);
     } else {
-        nextPlayer = response.nextPlayer;
+        nextPlayer = move.nextPlayer;
         setDirectionsForTurn(nextPlayer);
     }
 }
 
 function setDirectionsForResult(winnerSymbol, differential) {
-    let numTiles = BOARD_SIZE * BOARD_SIZE;
     let winnerTotal = 0;
     let loserTotal = 0;
     for (let x=0; x<BOARD_SIZE; x++) {

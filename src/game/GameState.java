@@ -35,4 +35,20 @@ public interface GameState {
      * score of the player returned from {@code getOpposingPlayer}.
      */
     double getScoreDifferential();
+
+    /**
+     * Returns the score of the given player minus the score of the opposing
+     * player.
+     */
+    double getScoreDifferential(Player player);
+
+    /**
+     * Returns the score for the player.
+     */
+    double getScore(Player player);
+
+    /**
+     * Returns the JSON representation of the state.
+     */
+    String toJSON();
 }
