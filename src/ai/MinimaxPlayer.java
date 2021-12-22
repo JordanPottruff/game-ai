@@ -2,8 +2,9 @@ package ai;
 
 import game.GamePlayer;
 import game.GameState;
+import game.GameStatus;
 
-import java.util.Optional;
+import java.util.HashSet;
 import java.util.Set;
 
 public class MinimaxPlayer extends GamePlayer {
@@ -39,8 +40,8 @@ public class MinimaxPlayer extends GamePlayer {
     }
 
     public MinimaxResult makeMove(GameState state, int depth) {
-        Set<GameState> nextStates = state.nextStates();
-        Optional<GamePlayer> winner = state.getWinner();
+        Set<GameState> nextStates = new HashSet<>(state.nextStates().values());
+        GameStatus status = state.getStatus();
         GamePlayer nextPlayer = state.nextPlayer();
 
         // Maximize own-score for own-moves, but minimize own-score for
@@ -50,8 +51,8 @@ public class MinimaxPlayer extends GamePlayer {
             double maximizingScore = Double.NEGATIVE_INFINITY;
             for(GameState nextState: nextStates) {
                 double score;
-                if (winner.isPresent()) {
-                    score = getTerminalScore(winner.get());
+                if (status.isOver()) {
+                    score = getTerminalScore(status);
                 } else if (depth == 0) {
                     score = nextState.getScore(this);
                 } else {
@@ -68,8 +69,8 @@ public class MinimaxPlayer extends GamePlayer {
             double minimizingScore = Double.POSITIVE_INFINITY;
             for(GameState nextState: nextStates) {
                 double score;
-                if (winner.isPresent()) {
-                    score = getTerminalScore(winner.get());
+                if (status.isOver()) {
+                    score = getTerminalScore(status);
                 } else if (depth == 0) {
                     score = nextState.getScore(this);
                 } else {
@@ -84,8 +85,12 @@ public class MinimaxPlayer extends GamePlayer {
         }
     }
 
-    private double getTerminalScore(GamePlayer winner) {
-        return winner == this ?
+    private double getTerminalScore(GameStatus status) {
+        if (status.getResult() == GameStatus.Result.TIE) return 0;
+        if (status.getWinner().isEmpty()) {
+            throw new IllegalArgumentException("Invalid status: " + status);
+        }
+        return status.getWinner().get().equals(this) ?
                 Double.POSITIVE_INFINITY :
                 Double.NEGATIVE_INFINITY;
     }

@@ -29,4 +29,8 @@ public abstract class GamePlayer {
     public String toString() {
         return this.getLabel();
     }
+
+    public boolean equals(GamePlayer player) {
+        return getLabel().equals(player.getLabel());
+    }
 }
