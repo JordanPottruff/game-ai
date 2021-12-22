@@ -17,7 +17,7 @@ public class Driver {
         runTwoPlayer(reader);
     }
 
-    private static void runTwoPlayer(BufferedReader reader) {
+    private static void runTwoPlayer(BufferedReader reader) throws IOException {
         OthelloPlayer white = new OthelloPlayer("White", 'W');
         OthelloPlayer black = new OthelloPlayer("Black", 'B');
         OthelloState state = new OthelloState(white, black);
