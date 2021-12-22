@@ -15,17 +15,17 @@ public class OthelloState implements GameState {
     private Map<GamePlayer, Double> scoresCache = new HashMap<>();
 
     // Immutable state.
-    private final OthelloPlayer white;
-    private final OthelloPlayer black;
-    private final OthelloPlayer lastToMove;
+    private final GamePlayer white;
+    private final GamePlayer black;
+    private final GamePlayer lastToMove;
     private final OthelloBoard board;
 
-    public OthelloState(OthelloPlayer white, OthelloPlayer black) {
+    public OthelloState(GamePlayer white, GamePlayer black) {
         this(white, black, white, new OthelloBoard(white, black));
     }
 
-    private OthelloState(OthelloPlayer white, OthelloPlayer black,
-                         OthelloPlayer lastToMove, OthelloBoard board) {
+    private OthelloState(GamePlayer white, GamePlayer black,
+                         GamePlayer lastToMove, OthelloBoard board) {
         this.white = white;
         this.black = black;
         this.lastToMove = lastToMove;
@@ -45,14 +45,15 @@ public class OthelloState implements GameState {
     // result.
     private Map<String, OthelloState> nextStatesNoCache() {
         // First look for moves in the player who did not go last.
-        OthelloPlayer player = getOtherPlayer(lastPlayer());
+        GamePlayer player = getOtherPlayer(lastPlayer());
         Map<String, OthelloBoard> nextBoards = board.getNextBoards(player);
+        // If that player can't make moves, try the last player.
         if (nextBoards.isEmpty()) {
             player = lastPlayer();
             nextBoards = board.getNextBoards(player);
         }
         // Convert each board to a game state.
-        final OthelloPlayer fPlayer = player;
+        final GamePlayer fPlayer = player;
         return nextBoards.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, board ->
                         new OthelloState(white, black, fPlayer, board.getValue())
@@ -60,12 +61,12 @@ public class OthelloState implements GameState {
     }
 
     @Override
-    public OthelloPlayer lastPlayer() {
+    public GamePlayer lastPlayer() {
         return lastToMove;
     }
 
     @Override
-    public OthelloPlayer nextPlayer() {
+    public GamePlayer nextPlayer() {
         Map<String, OthelloState> nextStates = nextStates();
         // Examine first of next-states to see who the last player is, which
         // is the next player of this state.
@@ -76,7 +77,7 @@ public class OthelloState implements GameState {
     }
 
     @Override
-    public OthelloPlayer getOtherPlayer(GamePlayer player) {
+    public GamePlayer getOtherPlayer(GamePlayer player) {
         if (player == white) return black;
         if (player == black) return white;
         throw new IllegalArgumentException("Player " + player + "is not a " +

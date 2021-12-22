@@ -12,17 +12,17 @@ public class OthelloBoard {
     private static final byte BLACK_BYTE = 2;
 
     private final byte[] board;
-    private final OthelloPlayer white;
-    private final OthelloPlayer black;
+    private final GamePlayer white;
+    private final GamePlayer black;
 
-    private OthelloBoard(OthelloPlayer white, OthelloPlayer black,
+    private OthelloBoard(GamePlayer white, GamePlayer black,
                          byte[] board) {
         this.white = white;
         this.black = black;
         this.board = board;
     }
 
-    public OthelloBoard(OthelloPlayer white, OthelloPlayer black) {
+    public OthelloBoard(GamePlayer white, GamePlayer black) {
         this.white = white;
         this.black = black;
         this.board = new byte[BOARD_SIZE * BOARD_SIZE];
@@ -52,23 +52,23 @@ public class OthelloBoard {
         return x*BOARD_SIZE+y;
     }
 
-    private void setTile(int x, int y, OthelloPlayer player) {
+    private void setTile(int x, int y, GamePlayer player) {
         byte value = 0;
         if (player == white) value = WHITE_BYTE;
         if (player == black) value = BLACK_BYTE;
         board[toPosition(x, y)] = value;
     }
 
-    public OthelloPlayer getTile(int x, int y) {
+    public GamePlayer getTile(int x, int y) {
         byte raw = board[toPosition(x, y)];
         return toPlayer(raw);
     }
 
-    public Map<String, OthelloBoard> getNextBoards(OthelloPlayer forPlayer) {
+    public Map<String, OthelloBoard> getNextBoards(GamePlayer forPlayer) {
         Map<String, OthelloBoard> nextBoards = new HashMap<>();
         for(int x=0; x<BOARD_SIZE; x++) {
             for(int y=0; y<BOARD_SIZE; y++) {
-                OthelloPlayer owner = getTile(x, y);
+                GamePlayer owner = getTile(x, y);
                 if (owner == null) {
                     Optional<OthelloBoard> newBoard =
                             checkOpenSquare(x, y, forPlayer);
@@ -83,7 +83,7 @@ public class OthelloBoard {
     }
 
     private Optional<OthelloBoard> checkOpenSquare(
-            int x, int y, OthelloPlayer forPlayer) {
+            int x, int y, GamePlayer forPlayer) {
         Builder copy = toBuilder();
 
         List<Optional<Builder>> sequences = List.of(
@@ -113,14 +113,14 @@ public class OthelloBoard {
 
     private Optional<Builder> checkSequence(
             int x, int y, int dx, int dy,
-            OthelloBoard.Builder board, OthelloPlayer forPlayer) {
+            OthelloBoard.Builder board, GamePlayer forPlayer) {
 
         int count = 0;
         for(int i=1; i<BOARD_SIZE; i++) {
             int nx = x + dx*i;
             int ny = y + dy*i;
             if (isValid(nx, ny)) {
-                OthelloPlayer owner = getTile(nx, ny);
+                GamePlayer owner = getTile(nx, ny);
                 if (owner == null) {
                     count = 0;
                     break;
@@ -147,7 +147,7 @@ public class OthelloBoard {
         return x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
     }
 
-    private OthelloPlayer toPlayer(byte raw) {
+    private GamePlayer toPlayer(byte raw) {
         if (raw == WHITE_BYTE) return white;
         if (raw == BLACK_BYTE) return black;
         if (raw == EMPTY_BYTE) return null;
@@ -174,7 +174,7 @@ public class OthelloBoard {
         for(int x=0; x<BOARD_SIZE; x++) {
             str.append("[");
             for(int y=0; y<BOARD_SIZE; y++) {
-                OthelloPlayer owner = getTile(x, y);
+                GamePlayer owner = getTile(x, y);
                 char symbol = owner == null ? '_' : owner.getSymbol();
                 str.append("\"").append(symbol).append("\"");
                 if (y != BOARD_SIZE-1) {
@@ -192,7 +192,7 @@ public class OthelloBoard {
         for(int y=BOARD_SIZE-1; y>=0; y--) {
             str.append(y+1);
             for(int x=0; x<BOARD_SIZE; x++) {
-                OthelloPlayer owner = getTile(x, y);
+                GamePlayer owner = getTile(x, y);
                 char symbol = owner == null ? '_' : owner.getSymbol();
                 str.append(" ").append(symbol);
             }
@@ -214,21 +214,21 @@ public class OthelloBoard {
     }
 
     public static class Builder {
-        private OthelloPlayer white = null;
-        private OthelloPlayer black = null;
+        private GamePlayer white = null;
+        private GamePlayer black = null;
         private byte[] board = new byte[BOARD_SIZE*BOARD_SIZE];
 
-        public Builder setWhite(OthelloPlayer player) {
+        public Builder setWhite(GamePlayer player) {
             white = player;
             return this;
         }
 
-        public Builder setBlack(OthelloPlayer player) {
+        public Builder setBlack(GamePlayer player) {
             black = player;
             return this;
         }
 
-        public Builder setTile(int x, int y, OthelloPlayer player) {
+        public Builder setTile(int x, int y, GamePlayer player) {
             board[toPosition(x, y)] = toByte(player);
             return this;
         }
@@ -242,7 +242,7 @@ public class OthelloBoard {
             return this;
         }
 
-        private byte toByte(OthelloPlayer player) {
+        private byte toByte(GamePlayer player) {
             if (white != player && black != player) {
                 throw new IllegalArgumentException("Player " + player + " " +
                         "does not belong to the board.");
