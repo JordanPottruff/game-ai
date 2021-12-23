@@ -34,11 +34,12 @@ public class OthelloState implements GameState {
 
     @Override
     public Map<String, OthelloState> nextStates() {
-        // Compute next states if it's not already cached.
-        if (nextStatesCache == null) {
-            this.nextStatesCache = nextStatesNoCache();
-        }
-        return this.nextStatesCache;
+        return nextStatesNoCache();
+//        // Compute next states if it's not already cached.
+//        if (nextStatesCache == null) {
+//            this.nextStatesCache = nextStatesNoCache();
+//        }
+//        return this.nextStatesCache;
     }
 
     // Computes the next states that can be arrived at but does not cache the

@@ -3,6 +3,8 @@ package game.othello;
 import game.GamePlayer;
 import game.GameState;
 
+import java.util.Map;
+
 public class OthelloPlayer extends GamePlayer {
 
     private final String label;
@@ -24,7 +26,7 @@ public class OthelloPlayer extends GamePlayer {
     }
 
     @Override
-    public GameState makeMove(GameState state) {
+    public Map.Entry<String, GameState> makeMove(GameState state) {
         return null;
     }
 }

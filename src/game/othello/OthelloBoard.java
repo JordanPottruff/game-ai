@@ -114,9 +114,8 @@ public class OthelloBoard {
     private Optional<Builder> checkSequence(
             int x, int y, int dx, int dy,
             OthelloBoard.Builder board, GamePlayer forPlayer) {
-
         int count = 0;
-        for(int i=1; i<BOARD_SIZE; i++) {
+        for(int i=1; i<=BOARD_SIZE; i++) {
             int nx = x + dx*i;
             int ny = y + dy*i;
             if (isValid(nx, ny)) {
@@ -243,6 +242,7 @@ public class OthelloBoard {
         }
 
         private byte toByte(GamePlayer player) {
+            if (player == null) return EMPTY_BYTE;
             if (white != player && black != player) {
                 throw new IllegalArgumentException("Player " + player + " " +
                         "does not belong to the board.");

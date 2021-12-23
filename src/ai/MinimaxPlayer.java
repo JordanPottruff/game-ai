@@ -4,7 +4,9 @@ import game.GamePlayer;
 import game.GameState;
 import game.GameStatus;
 
+import java.util.AbstractMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class MinimaxPlayer extends GamePlayer {
@@ -30,17 +32,18 @@ public class MinimaxPlayer extends GamePlayer {
     }
 
     @Override
-    public GameState makeMove(GameState state) {
+    public Map.Entry<String, GameState> makeMove(GameState state) {
         if (state.nextPlayer() != this) {
             String msg =
                     String.format("Player %s is not the next player.", this);
             throw new IllegalArgumentException(msg);
         }
-        return makeMove(state, depth).getState();
+        MinimaxResult result = makeMove(state, depth);
+        return result.toEntry();
     }
 
     public MinimaxResult makeMove(GameState state, int depth) {
-        Set<GameState> nextStates = new HashSet<>(state.nextStates().values());
+        Map<String, ? extends GameState> nextStates = state.nextStates();
         GameStatus status = state.getStatus();
         GamePlayer nextPlayer = state.nextPlayer();
 
@@ -48,40 +51,48 @@ public class MinimaxPlayer extends GamePlayer {
         // opponent-moves.
         if (nextPlayer == this) {
             GameState maximizingState = null;
+            String maximizingMove = null;
             double maximizingScore = Double.NEGATIVE_INFINITY;
-            for(GameState nextState: nextStates) {
+            for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
+                GameState nextState = next.getValue();
                 double score;
                 if (status.isOver()) {
                     score = getTerminalScore(status);
-                } else if (depth == 0) {
+                } else if (depth == 1) {
                     score = nextState.getScore(this);
                 } else {
                     score = makeMove(nextState, depth-1).getScore();
                 }
                 if (score > maximizingScore) {
                     maximizingState = nextState;
+                    maximizingMove = next.getKey();
                     maximizingScore = score;
                 }
             }
-            return new MinimaxResult(maximizingState, maximizingScore);
+            return new MinimaxResult(maximizingState, maximizingMove,
+                    maximizingScore);
         } else {
             GameState minimizingState = null;
+            String minimizingMove = null;
             double minimizingScore = Double.POSITIVE_INFINITY;
-            for(GameState nextState: nextStates) {
+            for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
+                GameState nextState = next.getValue();
                 double score;
                 if (status.isOver()) {
                     score = getTerminalScore(status);
-                } else if (depth == 0) {
+                } else if (depth == 1) {
                     score = nextState.getScore(this);
                 } else {
                     score = makeMove(nextState, depth-1).getScore();
                 }
                 if (score < minimizingScore) {
                     minimizingState = nextState;
+                    minimizingMove = next.getKey();
                     minimizingScore = score;
                 }
             }
-            return new MinimaxResult(minimizingState, minimizingScore);
+            return new MinimaxResult(minimizingState, minimizingMove,
+                    minimizingScore);
         }
     }
 
@@ -97,10 +108,12 @@ public class MinimaxPlayer extends GamePlayer {
 
     private static final class MinimaxResult {
         private final GameState state;
+        private final String move;
         private final double score;
 
-        MinimaxResult(GameState state, double score) {
+        MinimaxResult(GameState state, String move, double score) {
             this.state = state;
+            this.move = move;
             this.score = score;
         }
 
@@ -108,8 +121,16 @@ public class MinimaxPlayer extends GamePlayer {
             return this.state;
         }
 
+        String getMove() {
+            return this.move;
+        }
+
         double getScore() {
             return this.score;
+        }
+
+        Map.Entry<String, GameState> toEntry() {
+            return new AbstractMap.SimpleEntry<String, GameState>(move, state);
         }
     }
 

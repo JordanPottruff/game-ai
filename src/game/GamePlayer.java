@@ -1,5 +1,7 @@
 package game;
 
+import java.util.Map;
+
 public abstract class GamePlayer {
 
     /**
@@ -24,7 +26,7 @@ public abstract class GamePlayer {
      * @throws IllegalArgumentException if the player is not the next player
      * to make a move in the given game state.
      */
-    public abstract GameState makeMove(GameState state);
+    public abstract Map.Entry<String, ? extends GameState> makeMove(GameState state);
 
     public String toString() {
         return this.getLabel();
