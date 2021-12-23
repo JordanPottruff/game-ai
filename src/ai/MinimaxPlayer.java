@@ -54,15 +54,7 @@ public class MinimaxPlayer extends GamePlayer {
             double maximizingScore = Double.NEGATIVE_INFINITY;
             for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
                 GameState nextState = next.getValue();
-                GameStatus nextStatus = nextState.getStatus();
-                double score;
-                if (nextStatus.isOver()) {
-                    score = getTerminalScore(nextStatus);
-                } else if (depth == 1) {
-                    score = nextState.getScore(this);
-                } else {
-                    score = makeMove(nextState, depth-1).getScore();
-                }
+                double score = getScore(nextState, depth);
                 if (score > maximizingScore || maximizingMove == null) {
                     maximizingState = nextState;
                     maximizingMove = next.getKey();
@@ -77,15 +69,7 @@ public class MinimaxPlayer extends GamePlayer {
             double minimizingScore = Double.POSITIVE_INFINITY-1;
             for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
                 GameState nextState = next.getValue();
-                GameStatus nextStatus = nextState.getStatus();
-                double score;
-                if (nextStatus.isOver()) {
-                    score = getTerminalScore(nextStatus);
-                } else if (depth == 1) {
-                    score = nextState.getScore(this);
-                } else {
-                    score = makeMove(nextState, depth-1).getScore();
-                }
+                double score = getScore(nextState, depth);
                 if (score < minimizingScore || minimizingMove == null) {
                     minimizingState = nextState;
                     minimizingMove = next.getKey();
@@ -95,6 +79,16 @@ public class MinimaxPlayer extends GamePlayer {
             return new MinimaxResult(minimizingState, minimizingMove,
                     minimizingScore);
         }
+    }
+
+    private double getScore(GameState state, int depth) {
+        GameStatus status = state.getStatus();
+        if (status.isOver()) {
+            return getTerminalScore(status);
+        } else if (depth == 1){
+            return state.getScore(this);
+        }
+        return makeMove(state, depth-1).getScore();
     }
 
     private double getTerminalScore(GameStatus status) {
