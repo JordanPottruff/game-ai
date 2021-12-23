@@ -34,12 +34,12 @@ public class OthelloState implements GameState {
 
     @Override
     public Map<String, OthelloState> nextStates() {
-        return nextStatesNoCache();
-//        // Compute next states if it's not already cached.
-//        if (nextStatesCache == null) {
-//            this.nextStatesCache = nextStatesNoCache();
-//        }
-//        return this.nextStatesCache;
+        // Compute next states if it's not already cached.
+        Map<String, OthelloState> cache = getNextStatesCache();
+        if (cache == null) {
+            this.nextStatesCache = nextStatesNoCache();
+        }
+        return getNextStatesCache();
     }
 
     // Computes the next states that can be arrived at but does not cache the
@@ -59,6 +59,19 @@ public class OthelloState implements GameState {
                 .collect(Collectors.toMap(Map.Entry::getKey, board ->
                         new OthelloState(white, black, fPlayer, board.getValue())
                 ));
+    }
+
+    private Map<String, OthelloState> getNextStatesCache() {
+        if (nextStatesCache == null) {
+            return null;
+        }
+        return nextStatesCache.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, state ->
+                        state.getValue().copy()));
+    }
+
+    private OthelloState copy() {
+        return new OthelloState(white, black, lastToMove, board);
     }
 
     @Override
