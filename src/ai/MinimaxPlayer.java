@@ -44,7 +44,6 @@ public class MinimaxPlayer extends GamePlayer {
 
     public MinimaxResult makeMove(GameState state, int depth) {
         Map<String, ? extends GameState> nextStates = state.nextStates();
-        GameStatus status = state.getStatus();
         GamePlayer nextPlayer = state.nextPlayer();
 
         // Maximize own-score for own-moves, but minimize own-score for
@@ -55,15 +54,16 @@ public class MinimaxPlayer extends GamePlayer {
             double maximizingScore = Double.NEGATIVE_INFINITY;
             for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
                 GameState nextState = next.getValue();
+                GameStatus nextStatus = nextState.getStatus();
                 double score;
-                if (status.isOver()) {
-                    score = getTerminalScore(status);
+                if (nextStatus.isOver()) {
+                    score = getTerminalScore(nextStatus);
                 } else if (depth == 1) {
                     score = nextState.getScore(this);
                 } else {
                     score = makeMove(nextState, depth-1).getScore();
                 }
-                if (score > maximizingScore) {
+                if (score > maximizingScore || maximizingMove == null) {
                     maximizingState = nextState;
                     maximizingMove = next.getKey();
                     maximizingScore = score;
@@ -74,18 +74,19 @@ public class MinimaxPlayer extends GamePlayer {
         } else {
             GameState minimizingState = null;
             String minimizingMove = null;
-            double minimizingScore = Double.POSITIVE_INFINITY;
+            double minimizingScore = Double.POSITIVE_INFINITY-1;
             for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
                 GameState nextState = next.getValue();
+                GameStatus nextStatus = nextState.getStatus();
                 double score;
-                if (status.isOver()) {
-                    score = getTerminalScore(status);
+                if (nextStatus.isOver()) {
+                    score = getTerminalScore(nextStatus);
                 } else if (depth == 1) {
                     score = nextState.getScore(this);
                 } else {
                     score = makeMove(nextState, depth-1).getScore();
                 }
-                if (score < minimizingScore) {
+                if (score < minimizingScore || minimizingMove == null) {
                     minimizingState = nextState;
                     minimizingMove = next.getKey();
                     minimizingScore = score;
@@ -106,12 +107,12 @@ public class MinimaxPlayer extends GamePlayer {
                 Double.NEGATIVE_INFINITY;
     }
 
-    private static final class MinimaxResult {
+    public static final class MinimaxResult {
         private final GameState state;
         private final String move;
         private final double score;
 
-        MinimaxResult(GameState state, String move, double score) {
+        public MinimaxResult(GameState state, String move, double score) {
             this.state = state;
             this.move = move;
             this.score = score;
