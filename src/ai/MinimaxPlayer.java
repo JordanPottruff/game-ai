@@ -5,9 +5,7 @@ import game.GameState;
 import game.GameStatus;
 
 import java.util.AbstractMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class MinimaxPlayer extends GamePlayer {
 
