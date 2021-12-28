@@ -32,8 +32,19 @@ public class MinimaxPlayer extends GamePlayer {
     @Override
     public Map.Entry<String, GameState> makeMove(GameState state) {
         checkInvalidState(state);
-        MinimaxResult result = makeMove(state, depth);
-        return result.toEntry();
+        Map<String, ? extends GameState> nextStates = state.nextStates();
+        double maxScore = Double.NEGATIVE_INFINITY;
+        String maximizingMove = null;
+        for(String move: nextStates.keySet()) {
+            GameState nextState = nextStates.get(move);
+            double score = getValue(nextState, depth);
+            if(score > maxScore) {
+                maxScore = score;
+                maximizingMove = move;
+            }
+        }
+        GameState maximizingState = nextStates.get(maximizingMove);
+        return new AbstractMap.SimpleEntry<>(maximizingMove, maximizingState);
     }
 
     protected void checkInvalidState(GameState state) {
@@ -44,42 +55,22 @@ public class MinimaxPlayer extends GamePlayer {
         }
     }
 
-    protected MinimaxResult makeMove(GameState state, int depth) {
+    protected double getValue(GameState state, int depth) {
         Map<String, ? extends GameState> nextStates = state.nextStates();
         GamePlayer nextPlayer = state.nextPlayer();
 
         // Maximize own-score for own-moves, but minimize own-score for
-        // opponent-moves.
+        // opponent moves.
         if (nextPlayer == this) {
-            GameState maximizingState = null;
-            String maximizingMove = null;
-            double maximizingScore = Double.NEGATIVE_INFINITY;
-            for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
-                GameState nextState = next.getValue();
-                double score = getScore(nextState, depth);
-                if (score > maximizingScore || maximizingMove == null) {
-                    maximizingState = nextState;
-                    maximizingMove = next.getKey();
-                    maximizingScore = score;
-                }
-            }
-            return new MinimaxResult(maximizingState, maximizingMove,
-                    maximizingScore);
+            return nextStates.values().stream()
+                    .map((nextState) -> getScore(nextState, depth))
+                    .max(Double::compare)
+                    .orElse(Double.NEGATIVE_INFINITY);
         } else {
-            GameState minimizingState = null;
-            String minimizingMove = null;
-            double minimizingScore = Double.POSITIVE_INFINITY-1;
-            for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
-                GameState nextState = next.getValue();
-                double score = getScore(nextState, depth);
-                if (score < minimizingScore || minimizingMove == null) {
-                    minimizingState = nextState;
-                    minimizingMove = next.getKey();
-                    minimizingScore = score;
-                }
-            }
-            return new MinimaxResult(minimizingState, minimizingMove,
-                    minimizingScore);
+            return nextStates.values().stream()
+                    .map((nextState) -> getScore(nextState, depth))
+                    .min(Double::compare)
+                    .orElse(Double.POSITIVE_INFINITY);
         }
     }
 
@@ -90,7 +81,7 @@ public class MinimaxPlayer extends GamePlayer {
         } else if (depth == 1){
             return state.getScore(this);
         }
-        return makeMove(state, depth-1).getScore();
+        return getValue(state, depth-1);
     }
 
     private double getTerminalScore(GameStatus status) {
@@ -102,33 +93,4 @@ public class MinimaxPlayer extends GamePlayer {
                 Double.POSITIVE_INFINITY :
                 Double.NEGATIVE_INFINITY;
     }
-
-    public static final class MinimaxResult {
-        private final GameState state;
-        private final String move;
-        private final double score;
-
-        public MinimaxResult(GameState state, String move, double score) {
-            this.state = state;
-            this.move = move;
-            this.score = score;
-        }
-
-        GameState getState() {
-            return this.state;
-        }
-
-        String getMove() {
-            return this.move;
-        }
-
-        double getScore() {
-            return this.score;
-        }
-
-        Map.Entry<String, GameState> toEntry() {
-            return new AbstractMap.SimpleEntry<String, GameState>(move, state);
-        }
-    }
-
 }

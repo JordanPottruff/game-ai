@@ -1,8 +1,8 @@
 package ai;
 
-import game.GamePlayer;
 import game.GameState;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +25,14 @@ public class MinimaxParallelPlayer extends MinimaxPlayer {
 
         // Separate first maximization out in order to dispatch work to
         // executor service.
-        List<Callable<MinimaxResult>> explorePaths = new ArrayList<>();
+        List<Callable<Result>> explorePaths = new ArrayList<>();
         Map<String, ? extends GameState> nextStates = state.nextStates();
-        for(Map.Entry<String, ? extends GameState> next: nextStates.entrySet()) {
-            final GameState nextState = next.getValue();
-            final String nextMove = next.getKey();
-            final int curDepth = depth;
-            explorePaths.add(() ->
-                            new MinimaxResult(
-                                    nextState, nextMove, getScore(nextState,
-                                    curDepth)));
+        for(String move: nextStates.keySet()) {
+            final GameState nextState = nextStates.get(move);
+            explorePaths
+                    .add(() -> new Result(move, getValue(nextState, depth)));
         }
-        List<Future<MinimaxResult>> resultFutures = new ArrayList<>();
+        List<Future<Result>> resultFutures = new ArrayList<>();
         try {
             resultFutures = executor.invokeAll(explorePaths);
         } catch (InterruptedException e) {
@@ -52,21 +48,21 @@ public class MinimaxParallelPlayer extends MinimaxPlayer {
         }
         double maximizingScore = Double.NEGATIVE_INFINITY;
         String maximizingMove = null;
-        GameState maximizingState = null;
-        for(Future<MinimaxResult> resultFuture: resultFutures) {
+        for(Future<Result> resultFuture: resultFutures) {
             try {
-                MinimaxResult result = resultFuture.get();
-                if (result.getScore() > maximizingScore || maximizingState == null) {
-                    maximizingState = result.getState();
-                    maximizingMove = result.getMove();
-                    maximizingScore = result.getScore();
+                Result result = resultFuture.get();
+                if (result.score() > maximizingScore) {
+                    maximizingMove = result.move();
+                    maximizingScore = result.score();
                 }
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-        return new MinimaxResult(maximizingState, maximizingMove,
-                maximizingScore).toEntry();
+        GameState maximizingState = nextStates.get(maximizingMove);
+        return new AbstractMap.SimpleEntry<>(maximizingMove, maximizingState);
     }
+
+    private static record Result(String move, double score) {}
 
 }
