@@ -2,6 +2,7 @@ package main;
 
 import ai.MinimaxParallelPlayer;
 import ai.MinimaxPlayer;
+import ai.MinimaxPrunedParallelPlayer;
 import ai.MinimaxPrunedPlayer;
 import game.GamePlayer;
 import game.GameState;
@@ -21,13 +22,19 @@ public class Driver {
     public static void main(String[] args) throws IOException {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(System.in));
-        compare(new MinimaxPlayer("Minimax", 'M', 4),
-                new MinimaxPrunedPlayer("MinimaxPruned", 'P', 4));
+
+        MinimaxPlayer minimax = new MinimaxPlayer("Minimax", 'M', 4);
+        MinimaxPlayer minimaxPruned = new MinimaxPlayer("MinimaxPruned", 'U', 4);
+        MinimaxPlayer minimaxParallel = new MinimaxParallelPlayer(
+                "MinimaxParallel", 'A', 4, 3);
+        MinimaxPlayer minimaxPrunedParallel = new MinimaxPrunedParallelPlayer(
+                "MinimaxPrunedParallel", 'Z', 8, 3);
+        //compare(minimaxPruned, minimaxPrunedParallel, 100);
+        runVersusMinimax(reader, minimaxPrunedParallel);
     }
 
-    private static void compare(GamePlayer a, GamePlayer b) {
+    private static void compare(GamePlayer a, GamePlayer b, int runs) {
         Random rand = new Random();
-        int runs = 30;
         int aWins = 0;
         int bWins = 0;
         long aTime = 0;
@@ -161,11 +168,11 @@ public class Driver {
         }
     }
 
-    private static void runVersusMinimax(BufferedReader reader) throws IOException {
+    private static void runVersusMinimax(BufferedReader reader,
+                                         MinimaxPlayer player) throws IOException {
         int depth = 8;
         int poolSize = 3;
-        GamePlayer whiteAi = new MinimaxParallelPlayer("White", 'W', depth,
-                poolSize);
+        GamePlayer whiteAi = player;
         GamePlayer black = new OthelloPlayer("Black", 'B');
         GameState state = new OthelloState(whiteAi, black);
 

@@ -13,28 +13,33 @@ public class MinimaxPrunedPlayer extends MinimaxPlayer {
 
     @Override
     protected double getValue(GameState state, int depth) {
-        return getValue(state, Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY, depth);
+        return getValue(state, depth, this);
     }
 
-    protected double getValue(GameState state, double alpha,
-                              double beta, int depth) {
+    protected static double getValue(GameState state, int depth,
+                                     GamePlayer player) {
+        return getValue(state, Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY, depth, player);
+    }
+
+    protected static double getValue(GameState state, double alpha,
+                              double beta, int depth, GamePlayer player) {
         Map<String, ? extends GameState> nextStates = state.nextStates();
         GamePlayer nextPlayer = state.nextPlayer();
 
         if (depth == 1) {
-            return state.getScore(this);
+            return state.getScore(player);
         } else if (state.getStatus().isOver()) {
-            return getTerminalScore(state.getStatus());
+            return getTerminalScore(state.getStatus(), player);
         }
 
         // Maximize own-score for own-moves, but minimize own-score for
         // opponent moves.
-        if (nextPlayer == this) {
+        if (nextPlayer == player) {
             double maxScore = Double.NEGATIVE_INFINITY;
             for(GameState nextState: nextStates.values()) {
                 maxScore = Math.max(maxScore, getValue(nextState,
-                        alpha, beta, depth-1));
+                        alpha, beta, depth-1, player));
                 if (maxScore >= beta) {
                     break;
                 }
@@ -45,7 +50,7 @@ public class MinimaxPrunedPlayer extends MinimaxPlayer {
             double minScore = Double.POSITIVE_INFINITY;
             for(GameState nextState: nextStates.values()) {
                 minScore = Math.min(minScore, getValue(nextState,
-                        alpha, beta, depth-1));
+                        alpha, beta, depth-1, player));
                 if (minScore <= alpha) {
                     break;
                 }

@@ -23,6 +23,18 @@ public class MinimaxParallelPlayer extends MinimaxPlayer {
         checkInvalidState(state);
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
 
+
+        List<Future<Result>> resultFutures = getMoves(executor, state);
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return chooseMove(resultFutures, state.nextStates());
+    }
+
+    private List<Future<Result>> getMoves(ExecutorService executor,
+                                          GameState state) {
         // Separate first maximization out in order to dispatch work to
         // executor service.
         List<Callable<Result>> explorePaths = new ArrayList<>();
@@ -38,20 +50,17 @@ public class MinimaxParallelPlayer extends MinimaxPlayer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         executor.shutdown();
+        return resultFutures;
+    }
 
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private Map.Entry<String, GameState> chooseMove(List<Future<Result>> resultFutures, Map<String, ? extends GameState> nextStates) {
         double maximizingScore = Double.NEGATIVE_INFINITY;
         String maximizingMove = null;
         for(Future<Result> resultFuture: resultFutures) {
             try {
                 Result result = resultFuture.get();
-                if (result.score() > maximizingScore) {
+                if (result.score() > maximizingScore || maximizingMove == null) {
                     maximizingMove = result.move();
                     maximizingScore = result.score();
                 }

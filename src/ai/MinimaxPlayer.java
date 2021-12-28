@@ -92,11 +92,16 @@ public class MinimaxPlayer extends GamePlayer {
     }
 
     protected double getTerminalScore(GameStatus status) {
+        return getTerminalScore(status, this);
+    }
+
+    protected static double getTerminalScore(GameStatus status,
+                                             GamePlayer player) {
         if (status.getResult() == GameStatus.Result.TIE) return 0;
         if (status.getWinner().isEmpty()) {
             throw new IllegalArgumentException("Invalid status: " + status);
         }
-        return status.getWinner().get().equals(this) ?
+        return status.getWinner().get().equals(player) ?
                 Double.POSITIVE_INFINITY :
                 Double.NEGATIVE_INFINITY;
     }
