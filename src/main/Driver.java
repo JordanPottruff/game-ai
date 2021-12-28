@@ -2,6 +2,7 @@ package main;
 
 import ai.MinimaxParallelPlayer;
 import ai.MinimaxPlayer;
+import ai.MinimaxPrunedPlayer;
 import game.GamePlayer;
 import game.GameState;
 import game.GameStatus;
@@ -20,7 +21,55 @@ public class Driver {
     public static void main(String[] args) throws IOException {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(System.in));
-        runVersusMinimax(reader);
+        compare(new MinimaxPlayer("Minimax", 'M', 4),
+                new MinimaxPrunedPlayer("MinimaxPruned", 'P', 4));
+    }
+
+    private static void compare(GamePlayer a, GamePlayer b) {
+        Random rand = new Random();
+        int runs = 30;
+        int aWins = 0;
+        int bWins = 0;
+        long aTime = 0;
+        long bTime = 0;
+        for(int i=1; i<=runs; i++) {
+            boolean aIsWhite = rand.nextBoolean();
+            GamePlayer white = aIsWhite ? a : b;
+            GamePlayer black = aIsWhite ? b : a;
+
+            GameState state = new OthelloState(white, black);
+            while(!state.getStatus().isOver()) {
+                GamePlayer nextPlayer = state.nextPlayer();
+                long startTime = System.currentTimeMillis();
+                state = nextPlayer.makeMove(state).getValue();
+                long totalTime = System.currentTimeMillis() - startTime;
+                if (nextPlayer.equals(a)) {
+                    aTime += totalTime;
+                } else {
+                    bTime += totalTime;
+                }
+            }
+
+            GameStatus status = state.getStatus();
+            if (status.getResult() == GameStatus.Result.WON) {
+                GamePlayer winner = status.getWinner().get();
+                if (winner.equals(white)) {
+                    if (aIsWhite) aWins++;
+                    else bWins++;
+                } else {
+                    if (aIsWhite) bWins++;
+                    else aWins++;
+                }
+            }
+        }
+        double aTimeDouble = ((double)aTime)/1000;
+        double bTimeDouble = ((double)bTime)/1000;
+        String aOutcome = a.getLabel() + ": " + aWins + " in " + aTimeDouble +
+        " seconds.";
+        String bOutcome =
+                b.getLabel() + ": " + bWins + " in " + bTimeDouble + " " +
+                        "seconds.";
+        System.out.println(aOutcome + ", " + bOutcome);
     }
 
     private static void runMinimaxParallelComparison() {
