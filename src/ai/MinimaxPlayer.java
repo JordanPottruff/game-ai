@@ -11,7 +11,7 @@ public class MinimaxPlayer extends GamePlayer {
 
     private final String label;
     private final char symbol;
-    private final int depth;
+    protected final int depth;
 
     public MinimaxPlayer(String label, char symbol, int depth) {
         this.label = label;
@@ -31,16 +31,20 @@ public class MinimaxPlayer extends GamePlayer {
 
     @Override
     public Map.Entry<String, GameState> makeMove(GameState state) {
+        checkInvalidState(state);
+        MinimaxResult result = makeMove(state, depth);
+        return result.toEntry();
+    }
+
+    protected void checkInvalidState(GameState state) {
         if (state.nextPlayer() != this) {
             String msg =
                     String.format("Player %s is not the next player.", this);
             throw new IllegalArgumentException(msg);
         }
-        MinimaxResult result = makeMove(state, depth);
-        return result.toEntry();
     }
 
-    public MinimaxResult makeMove(GameState state, int depth) {
+    protected MinimaxResult makeMove(GameState state, int depth) {
         Map<String, ? extends GameState> nextStates = state.nextStates();
         GamePlayer nextPlayer = state.nextPlayer();
 
@@ -79,7 +83,7 @@ public class MinimaxPlayer extends GamePlayer {
         }
     }
 
-    private double getScore(GameState state, int depth) {
+    protected double getScore(GameState state, int depth) {
         GameStatus status = state.getStatus();
         if (status.isOver()) {
             return getTerminalScore(status);

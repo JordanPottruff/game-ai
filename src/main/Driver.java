@@ -1,5 +1,6 @@
 package main;
 
+import ai.MinimaxParallelPlayer;
 import ai.MinimaxPlayer;
 import game.GamePlayer;
 import game.GameState;
@@ -19,7 +20,53 @@ public class Driver {
     public static void main(String[] args) throws IOException {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(System.in));
-        runMinimaxComparison();
+        runVersusMinimax(reader);
+    }
+
+    private static void runMinimaxParallelComparison() {
+        Random rand = new Random();
+        int runs = 100;
+        int poolSize = 3;
+        for(int i=1; i<=5; i++) {
+            for(int j=1; j<=i; j++) {
+                int iCount = 0;
+                int jCount = 0;
+                int tieCount = 0;
+                for(int run=0; run<runs; run++) {
+                    boolean whiteI = rand.nextBoolean();
+                    int whiteDepth = whiteI ? i : j;
+                    int blackDepth = whiteI ? j : i;
+                    GamePlayer white = new MinimaxParallelPlayer("White", 'W',
+                            whiteDepth, poolSize);
+                    GamePlayer black = new MinimaxParallelPlayer("Black", 'B'
+                            , blackDepth, poolSize);
+                    GameState state = new OthelloState(white, black);
+
+                    while(!state.getStatus().isOver()) {
+                        state = state.nextPlayer().makeMove(state).getValue();
+                    }
+
+                    GameStatus status = state.getStatus();
+                    if (status.getResult() == GameStatus.Result.TIE) {
+                        tieCount++;
+                    } else {
+                        if (status.getWinner().isEmpty()) continue;
+                        GamePlayer winner = status.getWinner().get();
+                        if (winner == white) {
+                            if(whiteI) iCount++;
+                            else jCount++;
+                        } else {
+                            if(whiteI) jCount++;
+                            else iCount++;
+                        }
+                    }
+                }
+                String combo = String.format("(i: %d, j: %d)", i, j);
+                String result = String.format(": %d-%d-%d", iCount, jCount,
+                        tieCount);
+                System.out.println(combo + result);
+            }
+        }
     }
 
     private static void runMinimaxComparison() {
@@ -66,8 +113,10 @@ public class Driver {
     }
 
     private static void runVersusMinimax(BufferedReader reader) throws IOException {
-        int depth = 6;
-        GamePlayer whiteAi = new MinimaxPlayer("White", 'W', depth);
+        int depth = 8;
+        int poolSize = 3;
+        GamePlayer whiteAi = new MinimaxParallelPlayer("White", 'W', depth,
+                poolSize);
         GamePlayer black = new OthelloPlayer("Black", 'B');
         GameState state = new OthelloState(whiteAi, black);
 
