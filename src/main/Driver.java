@@ -29,8 +29,18 @@ public class Driver {
                 "MinimaxParallel", 'A', 4, 3);
         MinimaxPlayer minimaxPrunedParallel = new MinimaxPrunedParallelPlayer(
                 "MinimaxPrunedParallel", 'Z', 8, 3);
-        //compare(minimaxPruned, minimaxPrunedParallel, 100);
-        runVersusMinimax(reader, minimaxPrunedParallel);
+    }
+
+    private static void compareMinimax() {
+        for(int high=1; high<=8; high++) {
+            for(int low=1; low<=high; low++) {
+                System.out.println("High: " + high + ", Low: " + low);
+                compare(new MinimaxPrunedParallelPlayer("High", 'H', high, 3),
+                        new MinimaxPrunedParallelPlayer("Low", 'L', low, 3),
+                        50);
+                System.out.println();
+            }
+        }
     }
 
     private static void compare(GamePlayer a, GamePlayer b, int runs) {
