@@ -1,9 +1,6 @@
 package main;
 
-import ai.MinimaxParallelPlayer;
-import ai.MinimaxPlayer;
-import ai.MinimaxPrunedParallelPlayer;
-import ai.MinimaxPrunedPlayer;
+import ai.*;
 import game.GamePlayer;
 import game.GameState;
 import game.GameStatus;
@@ -29,6 +26,10 @@ public class Driver {
                 "MinimaxParallel", 'A', 4, 3);
         MinimaxPlayer minimaxPrunedParallel = new MinimaxPrunedParallelPlayer(
                 "MinimaxPrunedParallel", 'Z', 8, 3);
+        MonteCarloNaivePlayer monteCarloNaivePlayer = new MonteCarloNaivePlayer("MonteCarlo"
+                , 'C', 100);
+        // runVersusPlayer(reader, monteCarloPlayer);
+        compare(monteCarloNaivePlayer, minimaxPrunedParallel, 10);
     }
 
     private static void compareMinimax() {
@@ -178,8 +179,8 @@ public class Driver {
         }
     }
 
-    private static void runVersusMinimax(BufferedReader reader,
-                                         MinimaxPlayer player) throws IOException {
+    private static void runVersusPlayer(BufferedReader reader,
+                                        GamePlayer player) throws IOException {
         int depth = 8;
         int poolSize = 3;
         GamePlayer whiteAi = player;
