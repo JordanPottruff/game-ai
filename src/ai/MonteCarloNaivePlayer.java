@@ -12,7 +12,7 @@ public class MonteCarloNaivePlayer extends GamePlayer {
 
     private final String label;
     private final char symbol;
-    private final int samples;
+    protected final int samples;
 
     public MonteCarloNaivePlayer(String label, char symbol, int samples) {
         this.label = label;
@@ -32,12 +32,13 @@ public class MonteCarloNaivePlayer extends GamePlayer {
 
     @Override
     public Map.Entry<String, ? extends GameState> makeMove(GameState state) {
+        int samplesPerChild = samples / state.nextStates().size();
         double maxScore = Double.NEGATIVE_INFINITY;
         Map.Entry<String, ? extends GameState> maximizingMove = null;
         for(Map.Entry<String, ? extends GameState> move:
                 state.nextStates().entrySet()) {
             double score = 0;
-            for (int i=0; i<samples; i++) {
+            for (int i=0; i<samplesPerChild; i++) {
                 GameStatus rolloutResult = rollout(move.getValue());
                 score += scoreStatus(rolloutResult);
             }

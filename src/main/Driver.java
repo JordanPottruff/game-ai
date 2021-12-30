@@ -26,10 +26,13 @@ public class Driver {
                 "MinimaxParallel", 'A', 4, 3);
         MinimaxPlayer minimaxPrunedParallel = new MinimaxPrunedParallelPlayer(
                 "MinimaxPrunedParallel", 'Z', 8, 3);
-        MonteCarloNaivePlayer monteCarloNaivePlayer = new MonteCarloNaivePlayer("MonteCarlo"
-                , 'C', 100);
+        MonteCarloNaivePlayer monteCarloNaivePlayer =
+                new MonteCarloNaivePlayer("MonteCarloNaive"
+                , 'N', 10000);
+        MonteCarloPlayer monteCarloPlayer = new MonteCarloPlayer(
+                "MonteCarlo", 'C', 5000);
         // runVersusPlayer(reader, monteCarloPlayer);
-        compare(monteCarloNaivePlayer, minimaxPrunedParallel, 10);
+        compare(monteCarloPlayer, minimaxPrunedParallel, 10);
     }
 
     private static void compareMinimax() {
@@ -71,6 +74,7 @@ public class Driver {
             GameStatus status = state.getStatus();
             if (status.getResult() == GameStatus.Result.WON) {
                 GamePlayer winner = status.getWinner().get();
+                System.out.println(winner);
                 if (winner.equals(white)) {
                     if (aIsWhite) aWins++;
                     else bWins++;

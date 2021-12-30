@@ -204,6 +204,19 @@ public class OthelloBoard {
         return str.toString();
     }
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(board);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof OthelloBoard)) {
+            return false;
+        }
+        return Arrays.equals(((OthelloBoard)other).board, this.board);
+    }
+
     public Builder toBuilder() {
         byte[] boardCopy = Arrays.copyOf(board, board.length);
         return new Builder()

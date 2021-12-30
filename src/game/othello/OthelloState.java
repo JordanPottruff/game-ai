@@ -133,4 +133,24 @@ public class OthelloState implements GameState {
     public String toString() {
         return board.toString();
     }
+
+    @Override
+    public int hashCode() {
+        GamePlayer nextPlayer = nextPlayer();
+        String nextPlayerLabel = nextPlayer == null ? "null" :
+                nextPlayer.getLabel();
+        return (board.hashCode() + nextPlayerLabel).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof OthelloState otherState)) {
+            return false;
+        }
+
+        return board.equals(otherState.board) &&
+                white.equals(otherState.white) &&
+                black.equals(otherState.black) &&
+                nextPlayer() == otherState.nextPlayer();
+    }
 }
