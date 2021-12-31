@@ -31,8 +31,10 @@ public class Driver {
                 , 'N', 10000);
         MonteCarloPlayer monteCarloPlayer = new MonteCarloPlayer(
                 "MonteCarlo", 'C', 5000);
-        // runVersusPlayer(reader, monteCarloPlayer);
-        compare(monteCarloPlayer, minimaxPrunedParallel, 10);
+        MonteCarloTimedPlayer monteCarloTimedPlayer =
+                new MonteCarloTimedPlayer("MonteCarloTimed", 'T', 10000);
+        runVersusPlayer(reader, monteCarloTimedPlayer);
+        // compare(monteCarloPlayer, minimaxPrunedParallel, 10);
     }
 
     private static void compareMinimax() {

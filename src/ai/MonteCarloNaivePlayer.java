@@ -40,7 +40,7 @@ public class MonteCarloNaivePlayer extends GamePlayer {
             double score = 0;
             for (int i=0; i<samplesPerChild; i++) {
                 GameStatus rolloutResult = rollout(move.getValue());
-                score += scoreStatus(rolloutResult);
+                score += scoreStatus(rolloutResult, this);
             }
             if(score > maxScore || maximizingMove == null) {
                 maxScore = score;
@@ -57,12 +57,12 @@ public class MonteCarloNaivePlayer extends GamePlayer {
         return state.getStatus();
     }
 
-    protected double scoreStatus(GameStatus status) {
+    protected static double scoreStatus(GameStatus status, GamePlayer player) {
         if (status.getResult().equals(GameStatus.Result.TIE)) {
             return 0.5;
         } else {
-            return status.getWinner().map((player) -> player == this ? 1.0 :
-                    0.0).orElseThrow();
+            return status.getWinner().map((winner) -> winner.equals(player) ?
+                    1.0 : 0.0).orElseThrow();
         }
     }
 
